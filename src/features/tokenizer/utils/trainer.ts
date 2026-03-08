@@ -16,6 +16,28 @@ export class BPETokenizer {
         }
     }
 
+    async loadExisting() {
+        try {
+            const vocabData = JSON.parse(await readFile("vocab.json", "utf8"));
+            const mergesData = JSON.parse(await readFile("merges.json", "utf8"));
+
+            this.vocabulary = new Map(
+                Object.entries(vocabData).map(([k, v]) => [
+                    Number(k),
+                    new Uint8Array(v as number[]),
+                ])
+            );
+
+            this.merges = new Map(Object.entries(mergesData));
+
+            this.nextId = Math.max(...this.vocabulary.keys()) + 1;
+
+            console.log("Loaded existing tokenizer. NextId:", this.nextId);
+        } catch {
+            console.log("No existing tokenizer found. Starting fresh.");
+        }
+    }
+
     private createNewTokenId(): number {
         return this.nextId++;
     }
@@ -70,6 +92,9 @@ export class BPETokenizer {
     async train(text: string, target: number) {
         let token = Array.from(encode(text));
         while (this.nextId < target) {
+            if (this.nextId % 100 === 0) {
+              console.log("Current vocab size:", this.nextId);
+            }
             // Train one step
             const pairFreq: Map<string, number> = this.countPairs(token);
 
@@ -85,7 +110,7 @@ export class BPETokenizer {
             const token2Bytes = this.vocabulary.get(pairArr[1])!;
 
             const mergedBytes = new Uint8Array(
-              token1Bytes.length + token2Bytes.length,
+                token1Bytes.length + token2Bytes.length,
             );
             mergedBytes.set(token1Bytes, 0);
             mergedBytes.set(token2Bytes, token1Bytes.length);
@@ -101,10 +126,7 @@ export class BPETokenizer {
             "vocab.json",
             JSON.stringify(
                 Object.fromEntries(
-                    [...this.vocabulary.entries()].map(([k, v]) => [
-                        k,
-                        Array.from(v),
-                    ]),
+                    [...this.vocabulary.entries()].map(([k, v]) => [k, Array.from(v)]),
                 ),
                 null,
                 2,

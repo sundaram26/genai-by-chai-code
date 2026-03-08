@@ -47,7 +47,7 @@ export class Tokenizer {
         return tokens;
     }
 
-    decode(tokens: number[]): string {
+    bpeDecode(tokens: number[]): string {
         const bytes: number[] = [];
 
         for (const token of tokens) {
