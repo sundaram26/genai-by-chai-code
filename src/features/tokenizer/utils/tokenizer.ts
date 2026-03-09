@@ -6,8 +6,8 @@ export class Tokenizer {
     private merges = new Map<string, number>();
 
     async load() {
-        const vocabData = JSON.parse(await readFile("vocab.json", "utf8"));
-        const mergesData = JSON.parse(await readFile("merges.json", "utf8"));
+        const vocabData = JSON.parse(await readFile("src/features/tokenizer/utils/vocab.json", "utf8"));
+        const mergesData = JSON.parse(await readFile("src/features/tokenizer/utils/merges.json", "utf8"));
 
         this.vocab = new Map(
             Object.entries(vocabData).map(([k, v]) => [
@@ -58,6 +58,7 @@ export class Tokenizer {
             for (const byte of tokenBytes) {
                 bytes.push(byte);
             }
+            console.log(`Decoded token ${token} to bytes:`, `${Array.from(tokenBytes)} - ${utf8Decode(Array.from(tokenBytes))}`);
         }
 
         return utf8Decode(bytes);

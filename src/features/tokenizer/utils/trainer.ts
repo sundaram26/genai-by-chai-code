@@ -123,7 +123,7 @@ export class BPETokenizer {
         }
 
         await writeFile(
-            "vocab.json",
+            "src/features/tokenizer/utils/vocab.json",
             JSON.stringify(
                 Object.fromEntries(
                     [...this.vocabulary.entries()].map(([k, v]) => [k, Array.from(v)]),
@@ -134,7 +134,7 @@ export class BPETokenizer {
         );
 
         await writeFile(
-            "merges.json",
+            "src/features/tokenizer/utils/merges.json",
             JSON.stringify(Object.fromEntries(this.merges), null, 2),
         );
 

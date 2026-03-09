@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "train": "tsx src/features/tokenizer/training-data/training.ts"
+    "train": "tsx src/features/tokenizer/training-data/training.ts",
+    "test:training": "tsx src/features/tokenizer/training-data/test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
