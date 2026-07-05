@@ -1,0 +1,8 @@
+{
+  "chunkId": "tweet_0_1783270065966_chunk_0",
+  "source_id": "tweet_0_1783270065966",
+  "source_type": "twitter_post",
+  "text": "Coding is simple. Don't build complex architectures if a simple cron job works. Simple hai.",
+  "platform": "twitter",
+  "context": "reply"
+}

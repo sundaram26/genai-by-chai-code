@@ -17,40 +17,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid text input" }, { status: 400 });
     }
 
-    const tokens = tokenizer.bpeEncode(text);
-    const vocab = tokenizer.getVocab();
-    
-    const tokenDetails = tokens.map((id) => {
-      const bytes = vocab.get(id) || new Uint8Array();
-      
-      // Safe decoding of bytes
-      let textValue = "";
-      try {
-        textValue = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
-      } catch {
-        textValue = "";
-      }
-
-      return {
-        id,
-        text: textValue,
-        bytes: Array.from(bytes),
-      };
-    });
-
-    const totalBytes = new TextEncoder().encode(text).length;
-    const compressionRatio = tokens.length > 0 ? (totalBytes / tokens.length).toFixed(2) : "0.00";
-
-    return NextResponse.json({
-      tokens,
-      tokenDetails,
-      metrics: {
-        charCount: text.length,
-        byteCount: totalBytes,
-        tokenCount: tokens.length,
-        compressionRatio,
-      },
-    });
+    const result = tokenizer.tokenize(text);
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error("Tokenization API Error:", error);
     return NextResponse.json({ error: error.message || "Tokenization failed" }, { status: 500 });

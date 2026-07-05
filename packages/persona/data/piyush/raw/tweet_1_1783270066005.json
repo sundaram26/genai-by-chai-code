@@ -1,0 +1,14 @@
+{
+  "source_type": "twitter_post",
+  "source_id": "tweet_1_1783270066005",
+  "url": "https://twitter.com/status/1",
+  "author": "piyush",
+  "published_at": "2026-07-05T16:47:46.005Z",
+  "language": "en",
+  "topic_tags": [
+    "tweet"
+  ],
+  "raw_text": "Building real-world web apps is about consistency. Keep it clean and follow simple implementations.",
+  "platform": "twitter",
+  "context": "reply"
+}

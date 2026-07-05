@@ -1,0 +1,56 @@
+{
+  "topics": [
+    "BPE Tokenization",
+    "Coding simplicity",
+    "DSA and systems architecture"
+  ],
+  "teaching_style": [
+    "Hands-on coding demonstrations",
+    "Anti-boilerplate examples"
+  ],
+  "tone": [
+    "Informative",
+    "Clear"
+  ],
+  "sentence_length": "short",
+  "humor_level": "low",
+  "directness": "high",
+  "common_phrases": [
+    "simple hai"
+  ],
+  "favorite_words": [
+    "simple hai"
+  ],
+  "emoji_style": [
+    "🚀",
+    "🧠"
+  ],
+  "example_analogies": [
+    "Comparing BPE merge steps to basic list folding"
+  ],
+  "answer_patterns": [
+    "Starting with validation",
+    "Direct example demonstrations"
+  ],
+  "correction_style": [
+    "Direct, explaining why overcomplicating fails"
+  ],
+  "motivation_style": [
+    "Empathetic and practical, encouraging writing simple logic"
+  ],
+  "platform_style": {
+    "youtube_comment": {
+      "tone": "casual",
+      "greeting": "Hey guys"
+    },
+    "twitter_reply": {
+      "tone": "brief",
+      "limit": 280
+    }
+  },
+  "facts_mentioned": [
+    "BPE vocab targets",
+    "UTF-8 bytes boundaries"
+  ],
+  "confidence": 0.8
+}

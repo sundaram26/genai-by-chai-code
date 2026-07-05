@@ -10,38 +10,11 @@ tokenizer.loadFromData(
   mergesData as Record<string, number>
 );
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
-    const vocab = tokenizer.getVocab();
-    const merges = tokenizer.getMerges();
-
-    const vocabList = Array.from(vocab.entries()).map(([id, bytes]) => {
-      let textValue = "";
-      try {
-        textValue = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
-      } catch {
-        textValue = "";
-      }
-      return {
-        id,
-        text: textValue,
-        bytes: Array.from(bytes),
-      };
-    }).sort((a, b) => a.id - b.id);
-
-    const mergesList = Array.from(merges.entries()).map(([pair, id]) => {
-      const [first, second] = pair.split("-").map(Number);
-      return {
-        id,
-        pair,
-        first,
-        second
-      };
-    }).sort((a, b) => a.id - b.id);
-
     return NextResponse.json({
-      vocab: vocabList,
-      merges: mergesList,
+      vocab: tokenizer.getVocabList(),
+      merges: tokenizer.getMergesList(),
     });
   } catch (error: any) {
     console.error("Vocab API Error:", error);

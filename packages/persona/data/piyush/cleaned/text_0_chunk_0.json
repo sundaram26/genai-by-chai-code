@@ -1,0 +1,8 @@
+{
+  "chunkId": "text_0_chunk_0",
+  "source_id": "text_0",
+  "source_type": "website_page",
+  "text": "Hey everyone! Aaj hum baat karenge Web Development ki. Next.js is really amazing, chalo shuru karte hain. Project build karna bahut simple hai. Hum log clean structure use karenge. database queries directly server component me run karenge, so it's super clean and fast. Chalo code dekhte hain. Const getProducts = async () => { ... }. Dekha, simple implementation hai! Guys, if you follow this flow, it works perfectly. Chalo, projects load karte hain.",
+  "platform": "web",
+  "context": "explanation"
+}

@@ -9,9 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.7",
+    "@ai-sdk/react": "^4.0.16",
+    "@all-genai-assignments/persona": "workspace:*",
     "@all-genai-assignments/tokenizer": "workspace:*",
     "@base-ui/react": "^1.2.0",
     "@hookform/resolvers": "^5.2.2",
+    "ai": "^7.0.15",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

@@ -2,13 +2,30 @@ import { encode as utf8Encode, decode as utf8Decode } from "./encoder";
 import * as fs from "fs/promises";
 import * as path from "path";
 
+export interface TokenDetails {
+    id: number;
+    text: string;
+    bytes: number[];
+}
+
+export interface TokenizeResponse {
+    tokens: number[];
+    tokenDetails: TokenDetails[];
+    metrics: {
+        charCount: number;
+        byteCount: number;
+        tokenCount: number;
+        compressionRatio: string;
+    };
+}
+
 export class Tokenizer {
     private vocab = new Map<number, Uint8Array>();
     private merges = new Map<string, number>();
 
-    async load(customVocabPath?: string, customMergesPath?: string) {
+    async load(customVococabPath?: string, customMergesPath?: string) {
         // Fallback to reading relative to this module's directory
-        const vocabPath = customVocabPath || path.resolve(__dirname, "vocab.json");
+        const vocabPath = customVococabPath || path.resolve(__dirname, "vocab.json");
         const mergesPath = customMergesPath || path.resolve(__dirname, "merges.json");
 
         const vocabData = JSON.parse(await fs.readFile(vocabPath, "utf8"));
@@ -71,6 +88,67 @@ export class Tokenizer {
         }
 
         return utf8Decode(bytes);
+    }
+
+    tokenize(text: string): TokenizeResponse {
+        const tokens = this.bpeEncode(text);
+        
+        const tokenDetails: TokenDetails[] = tokens.map((id) => {
+            const bytes = this.vocab.get(id) || new Uint8Array();
+            let textValue = "";
+            try {
+                textValue = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
+            } catch {
+                textValue = "";
+            }
+            return {
+                id,
+                text: textValue,
+                bytes: Array.from(bytes),
+            };
+        });
+
+        const totalBytes = new TextEncoder().encode(text).length;
+        const compressionRatio = tokens.length > 0 ? (totalBytes / tokens.length).toFixed(2) : "0.00";
+
+        return {
+            tokens,
+            tokenDetails,
+            metrics: {
+                charCount: text.length,
+                byteCount: totalBytes,
+                tokenCount: tokens.length,
+                compressionRatio,
+            },
+        };
+    }
+
+    getVocabList() {
+        return Array.from(this.vocab.entries()).map(([id, bytes]) => {
+            let textValue = "";
+            try {
+                textValue = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
+            } catch {
+                textValue = "";
+            }
+            return {
+                id,
+                text: textValue,
+                bytes: Array.from(bytes),
+            };
+        }).sort((a, b) => a.id - b.id);
+    }
+
+    getMergesList() {
+        return Array.from(this.merges.entries()).map(([pair, id]) => {
+            const [first, second] = pair.split("-").map(Number);
+            return {
+                id,
+                pair,
+                first,
+                second
+            };
+        }).sort((a, b) => a.id - b.id);
     }
 
     getVocab() {

@@ -1,0 +1,3 @@
+Coding is simple. Don't build complex architectures if a simple cron job works. Simple hai.
+Guys, see this. Overcomplicating things is why projects fail. Write clean logic. Bro, coding is simple.
+Keep coding simple, write clean APIs, and avoid corporate fluff.

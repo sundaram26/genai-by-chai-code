@@ -1,0 +1,3 @@
+Server actions in Next.js make backend simple. Aaj hum project build karenge, chalo shuru karte hain.
+Building real-world web apps is about consistency. Keep it clean and follow simple implementations.
+React Server Components are super fast. Avoid unnecessary client-side state loads.
