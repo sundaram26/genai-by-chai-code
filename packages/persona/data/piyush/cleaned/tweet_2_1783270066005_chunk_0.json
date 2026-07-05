@@ -1,8 +1,0 @@
-{
-  "chunkId": "tweet_2_1783270066005_chunk_0",
-  "source_id": "tweet_2_1783270066005",
-  "source_type": "twitter_post",
-  "text": "React Server Components are super fast. Avoid unnecessary client-side state loads.",
-  "platform": "twitter",
-  "context": "reply"
-}
