@@ -1,15 +1,16 @@
-import { encode } from "../utils/encoder";
-import { Tokenizer } from "../utils/tokenizer";
+import * as path from "path";
+import { encode } from "../src/encoder";
+import { Tokenizer } from "../src/tokenizer";
 
 async function testTokenizer() {
     const tokenizer = new Tokenizer();
 
-    await tokenizer.load();
+    const vocabPath = path.resolve(__dirname, "../src/vocab.json");
+    const mergesPath = path.resolve(__dirname, "../src/merges.json");
 
-    // const text = "function hello_world() { return 42 }";
+    await tokenizer.load(vocabPath, mergesPath);
+
     const text = "The quick brown fox jumps over the lazy dog.";
-    // const text = "https://github.com/openai/gpt";
-    // const text = "aaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     console.log("Original Text:", text);
     const normalTokens = encode(text);
     console.log("UTF-8 Tokens:", normalTokens);

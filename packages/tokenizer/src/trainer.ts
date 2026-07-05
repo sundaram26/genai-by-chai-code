@@ -1,4 +1,5 @@
 import { readFile, writeFile } from "fs/promises";
+import * as path from "path";
 import { encode } from "./encoder";
 
 export class BPETokenizer {
@@ -16,10 +17,13 @@ export class BPETokenizer {
         }
     }
 
-    async loadExisting() {
+    async loadExisting(customVocabPath?: string, customMergesPath?: string) {
         try {
-            const vocabData = JSON.parse(await readFile("vocab.json", "utf8"));
-            const mergesData = JSON.parse(await readFile("merges.json", "utf8"));
+            const vocabPath = customVocabPath || path.resolve(__dirname, "vocab.json");
+            const mergesPath = customMergesPath || path.resolve(__dirname, "merges.json");
+
+            const vocabData = JSON.parse(await readFile(vocabPath, "utf8"));
+            const mergesData = JSON.parse(await readFile(mergesPath, "utf8"));
 
             this.vocabulary = new Map(
                 Object.entries(vocabData).map(([k, v]) => [
@@ -89,7 +93,7 @@ export class BPETokenizer {
         return newToken;
     }
 
-    async train(text: string, target: number) {
+    async train(text: string, target: number, customVocabPath?: string, customMergesPath?: string) {
         let token = Array.from(encode(text));
         while (this.nextId < target) {
             if (this.nextId % 100 === 0) {
@@ -122,8 +126,11 @@ export class BPETokenizer {
             token = this.mergePairs(token, bestPair, newId);
         }
 
+        const vocabPath = customVocabPath || path.resolve(__dirname, "vocab.json");
+        const mergesPath = customMergesPath || path.resolve(__dirname, "merges.json");
+
         await writeFile(
-            "src/features/tokenizer/utils/vocab.json",
+            vocabPath,
             JSON.stringify(
                 Object.fromEntries(
                     [...this.vocabulary.entries()].map(([k, v]) => [k, Array.from(v)]),
@@ -134,7 +141,7 @@ export class BPETokenizer {
         );
 
         await writeFile(
-            "src/features/tokenizer/utils/merges.json",
+            mergesPath,
             JSON.stringify(Object.fromEntries(this.merges), null, 2),
         );
 

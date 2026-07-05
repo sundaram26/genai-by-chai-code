@@ -1,14 +1,23 @@
-import { readFile } from "fs/promises";
 import { encode as utf8Encode, decode as utf8Decode } from "./encoder";
+import * as fs from "fs/promises";
+import * as path from "path";
 
 export class Tokenizer {
     private vocab = new Map<number, Uint8Array>();
     private merges = new Map<string, number>();
 
-    async load() {
-        const vocabData = JSON.parse(await readFile("src/features/tokenizer/utils/vocab.json", "utf8"));
-        const mergesData = JSON.parse(await readFile("src/features/tokenizer/utils/merges.json", "utf8"));
+    async load(customVocabPath?: string, customMergesPath?: string) {
+        // Fallback to reading relative to this module's directory
+        const vocabPath = customVocabPath || path.resolve(__dirname, "vocab.json");
+        const mergesPath = customMergesPath || path.resolve(__dirname, "merges.json");
 
+        const vocabData = JSON.parse(await fs.readFile(vocabPath, "utf8"));
+        const mergesData = JSON.parse(await fs.readFile(mergesPath, "utf8"));
+
+        this.loadFromData(vocabData, mergesData);
+    }
+
+    loadFromData(vocabData: Record<number, number[]>, mergesData: Record<string, number>) {
         this.vocab = new Map(
             Object.entries(vocabData).map(([k, v]) => [
                 Number(k),
@@ -62,5 +71,13 @@ export class Tokenizer {
         }
 
         return utf8Decode(bytes);
+    }
+
+    getVocab() {
+        return this.vocab;
+    }
+
+    getMerges() {
+        return this.merges;
     }
 }
