@@ -3,8 +3,8 @@
 A dynamic, real-time streaming LLM-based chat interface that accurately simulates the personalities, teaching styles, and technical domain knowledge of tech educators Hitesh Choudhary and Piyush Garg.
 
 ## 🚀 Live Demo & Access
-If hosted on Vercel (or any other hosting platform), you can interact with the personas directly by navigating to the designated persona route:
-**Access Route:** `/persona`
+You can interact with the personas directly at the deployed application:
+**Access Route:** [https://genaicohort.vercel.app/persona](https://genaicohort.vercel.app/persona)
 
 ---
 
