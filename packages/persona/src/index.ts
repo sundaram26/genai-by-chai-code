@@ -32,30 +32,13 @@ export function normalizePersona(value: unknown): PersonaId {
   return String(value).toLowerCase() === "piyush" ? "piyush" : "hitesh";
 }
 
+import { PIYUSH_PROMPT, HITESH_PROMPT } from "./prompts";
+
 export async function loadPersonaPrompt(persona: PersonaId) {
-  const fileName = PERSONA_FILES[persona];
-  const candidateDirs = [
-    path.resolve(__dirname, "../personas"),
-    path.resolve(__dirname, "../../personas"),
-    path.resolve(process.cwd(), "../../packages/persona/personas"),
-    path.resolve(process.cwd(), "packages/persona/personas"),
-  ];
-
-  console.log(process.env.OPENAI_API_KEY, "process.env.OPENAI_API_KEY")
-  console.log(process.env.OPENAI_BASE_URL, "process.env.OPENAI_BASE_URL")
-
-
-  for (const dir of candidateDirs) {
-    try {
-      return await fs.readFile(path.join(dir, fileName), "utf8");
-    } catch {
-      // Try the next runtime location.
-    }
-  }
-
-  throw new Error(`Could not load persona prompt: ${fileName}`);
+  if (persona === "piyush") return PIYUSH_PROMPT;
+  if (persona === "hitesh") return HITESH_PROMPT;
+  throw new Error(`Could not load persona prompt for: ${persona}`);
 }
-
 
 export async function streamPersonaResponse(options: StreamPersonaOptions) {
   const apiKey = options.apiKey || process.env.OPENAI_API_KEY;
