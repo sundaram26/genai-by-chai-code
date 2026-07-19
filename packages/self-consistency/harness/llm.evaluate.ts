@@ -25,15 +25,15 @@ export class LlmEvaluator {
         }
 
         const synthesisPrompt = `You are a final evaluator model in a self-consistency pipeline.
-The user asked the following question:
-"${prompt}"
+            The user asked the following question:
+            "${prompt}"
 
-Several different AI models were asked the same question. Here are their responses:
+            Several different AI models were asked the same question. Here are their responses:
 
-${responsesText}
+            ${responsesText}
 
-Your task is to compare these outputs, identify the strongest parts, and generate the best possible final response. 
-The final answer should not simply copy one model’s response. It should be a refined output created after analyzing all model responses.`;
+            Your task is to compare these outputs, identify the strongest parts, and generate the best possible final response. 
+            The final answer should not simply copy one model’s response. It should be a refined output created after analyzing all model responses.`;
 
         try {
             const response = await this.anthropicClient.messages.parse({

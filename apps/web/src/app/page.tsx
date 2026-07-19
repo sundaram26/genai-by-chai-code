@@ -51,6 +51,16 @@ export default function Home() {
                 Explore ↗
               </span>
             </Link>
+
+            <Link href="/self-consistency" className="group flex flex-col sm:flex-row sm:items-center justify-between py-8 border-b border-neutral-200 hover:bg-neutral-50 transition-colors -mx-4 px-4">
+              <div>
+                <h2 className="text-xl font-medium tracking-tight group-hover:text-neutral-600 transition-colors">Self Consistency</h2>
+                <p className="text-neutral-500 text-sm mt-1 font-light">Run prompts across multiple models and get the most frequent answer.</p>
+              </div>
+              <span className="hidden sm:inline-block text-xs uppercase tracking-widest text-neutral-400 group-hover:text-neutral-900 transition-colors">
+                Explore ↗
+              </span>
+            </Link>
           </div>
         </div>
 
