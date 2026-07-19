@@ -1,61 +1,71 @@
 import Link from "next/link";
-import { Bot, Braces, ArrowRight } from "lucide-react";
+import { ExternalLink, Linkedin, Github } from "lucide-react";
 
-const apps = [
-  {
-    href: "/tokenizer",
-    name: "Tokenizer",
-    description: "Inspect BPE tokenization, vocabulary entries, merge rules, and token metrics.",
-    icon: Braces,
-  },
-  {
-    href: "/persona",
-    name: "Persona",
-    description: "Chat with Piyush or Hitesh using markdown system prompts from the persona package.",
-    icon: Bot,
-  },
-];
+const XIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" className={className} fill="currentColor" width="24" height="24">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
-      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-6 py-12">
-        <header className="mb-8">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
+    <main className="min-h-screen w-full flex flex-col items-center justify-center bg-white text-neutral-900 selection:bg-neutral-900 selection:text-white font-sans">
+      <div className="w-full max-w-3xl px-8 flex flex-col justify-center">
+        {/* Header Section */}
+        <header className="mb-20">
+          <h1 className="text-4xl md:text-5xl font-light tracking-tight mb-6">
             GenAI Assignments
-          </p>
-          <h1 className="text-4xl font-black tracking-tight sm:text-5xl">
-            Choose an app
           </h1>
+          <p className="text-neutral-500 font-light text-lg max-w-lg leading-relaxed mb-8">
+            A collection of generative AI tools, experiments, and projects by Sundaram.
+          </p>
+          <a
+            href="https://sundaram.hashnode.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-medium border-b border-neutral-300 pb-1 hover:border-neutral-900 transition-colors"
+          >
+            Read my writing <ExternalLink size={14} className="opacity-70" />
+          </a>
         </header>
 
-        <section className="grid gap-4 md:grid-cols-2">
-          {apps.map((app) => {
-            const Icon = app.icon;
+        {/* Projects Section */}
+        <div className="w-full">
+          <div className="border-t border-neutral-200">
+            <Link href="/tokenizer" className="group flex flex-col sm:flex-row sm:items-center justify-between py-8 border-b border-neutral-200 hover:bg-neutral-50 transition-colors -mx-4 px-4">
+              <div>
+                <h2 className="text-xl font-medium tracking-tight group-hover:text-neutral-600 transition-colors">Tokenizer</h2>
+                <p className="text-neutral-500 text-sm mt-1 font-light">Inspect BPE tokenization, vocabulary entries, and metrics.</p>
+              </div>
+              <span className="hidden sm:inline-block text-xs uppercase tracking-widest text-neutral-400 group-hover:text-neutral-900 transition-colors">
+                Explore ↗
+              </span>
+            </Link>
 
-            return (
-              <Link
-                key={app.href}
-                href={app.href}
-                className="group rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-700"
-              >
-                <div className="mb-5 flex items-center justify-between">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-100 text-indigo-600 dark:bg-slate-800 dark:text-indigo-300">
-                    <Icon size={22} />
-                  </span>
-                  <ArrowRight
-                    size={18}
-                    className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-indigo-500"
-                  />
-                </div>
-                <h2 className="mb-2 text-xl font-bold">{app.name}</h2>
-                <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
-                  {app.description}
-                </p>
-              </Link>
-            );
-          })}
-        </section>
+            <Link href="/persona" className="group flex flex-col sm:flex-row sm:items-center justify-between py-8 border-b border-neutral-200 hover:bg-neutral-50 transition-colors -mx-4 px-4">
+              <div>
+                <h2 className="text-xl font-medium tracking-tight group-hover:text-neutral-600 transition-colors">Persona</h2>
+                <p className="text-neutral-500 text-sm mt-1 font-light">Chat with distinct personas using markdown system prompts.</p>
+              </div>
+              <span className="hidden sm:inline-block text-xs uppercase tracking-widest text-neutral-400 group-hover:text-neutral-900 transition-colors">
+                Explore ↗
+              </span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Footer / Socials */}
+        <footer className="mt-24 flex items-center gap-8 text-neutral-400">
+          <a href="https://x.com/sundaram_04" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-900 transition-colors" aria-label="X (Twitter)">
+            <XIcon className="w-5 h-5" />
+          </a>
+          <a href="https://www.linkedin.com/in/sundaram-singh-b5aa4823b/" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-900 transition-colors" aria-label="LinkedIn">
+            <Linkedin size={20} strokeWidth={1.5} />
+          </a>
+          <a href="https://github.com/Sundaram26/" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-900 transition-colors" aria-label="GitHub">
+            <Github size={20} strokeWidth={1.5} />
+          </a>
+        </footer>
       </div>
     </main>
   );

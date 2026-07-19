@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { 
   FileText, 
   Search, 
@@ -95,6 +96,35 @@ export default function TokenizerPlayground() {
   const [hoveredTokenIndex, setHoveredTokenIndex] = useState<number | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
+  // Filter vocab items based on search query
+  const filteredVocab = useMemo(() => {
+    return vocab.filter(item => {
+      if (!vocabSearch) return true;
+      const query = vocabSearch.toLowerCase();
+      return (
+        item.id.toString().includes(query) ||
+        item.text.toLowerCase().includes(query) ||
+        JSON.stringify(item.bytes).includes(query)
+      );
+    });
+  }, [vocab, vocabSearch]);
+
+  const vocabParentRef = useRef<HTMLDivElement>(null);
+  const vocabVirtualizer = useVirtualizer({
+    count: filteredVocab.length,
+    getScrollElement: () => vocabParentRef.current,
+    estimateSize: () => 48,
+    overscan: 5,
+  });
+
+  const mergesParentRef = useRef<HTMLDivElement>(null);
+  const mergesVirtualizer = useVirtualizer({
+    count: merges.length,
+    getScrollElement: () => mergesParentRef.current,
+    estimateSize: () => 70,
+    overscan: 5,
+  });
+
   // Fetch vocabulary & merges once on mount
   useEffect(() => {
     async function loadVocabData() {
@@ -166,17 +196,6 @@ export default function TokenizerPlayground() {
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
-  // Filter vocab items based on search query
-  const filteredVocab = vocab.filter(item => {
-    if (!vocabSearch) return true;
-    const query = vocabSearch.toLowerCase();
-    return (
-      item.id.toString().includes(query) ||
-      item.text.toLowerCase().includes(query) ||
-      JSON.stringify(item.bytes).includes(query)
-    );
-  });
-
   const getHoveredTokenDetail = () => {
     if (hoveredTokenIndex === null || hoveredTokenIndex >= tokenDetails.length) return null;
     return tokenDetails[hoveredTokenIndex];
@@ -185,77 +204,74 @@ export default function TokenizerPlayground() {
   const hoveredDetail = getHoveredTokenDetail();
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500 selection:text-white pb-16">
-      {/* Background Glows */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-500/10 dark:bg-pink-500/5 rounded-full blur-3xl pointer-events-none" />
+    <main className="fixed inset-0 bg-white text-neutral-900 font-sans selection:bg-neutral-900 selection:text-white flex flex-col">
 
       {/* Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 flex-1 flex flex-col min-h-0 w-full pb-8">
         
         {/* Header */}
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-200 dark:border-slate-800 pb-6 mb-8 gap-4">
+        <header className="flex flex-col md:flex-row md:items-end md:justify-between border-b border-neutral-200 pb-6 mb-6 gap-6 shrink-0">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-1 text-xs font-semibold tracking-wider text-indigo-800 dark:text-indigo-200 bg-indigo-100 dark:bg-indigo-900/40 rounded-full">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-neutral-400">
                 BPE Visualizer
               </span>
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-light tracking-tight text-neutral-900">
               Byte Pair Encoding Playground
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-sm font-light text-neutral-500 mt-2 max-w-lg">
               Explore how sub-word tokens are learned, split, and reconstituted by neural network tokenizers.
             </p>
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex bg-slate-200/60 dark:bg-slate-900/60 p-1 rounded-xl border border-slate-200 dark:border-slate-800 backdrop-blur-sm self-start md:self-auto">
+          <div className="flex border-b border-neutral-200 self-start md:self-auto">
             <button
               onClick={() => setActiveTab("playground")}
-              className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+              className={`flex items-center gap-2 px-5 py-2 text-sm font-medium transition-colors border-b-2 -mb-[1px] ${
                 activeTab === "playground"
-                  ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                  ? "border-neutral-900 text-neutral-900"
+                  : "border-transparent text-neutral-400 hover:text-neutral-700"
               }`}
             >
-              <Activity size={14} />
+              <Activity size={16} />
               Playground
             </button>
             <button
               onClick={() => setActiveTab("vocab")}
-              className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+              className={`flex items-center gap-2 px-5 py-2 text-sm font-medium transition-colors border-b-2 -mb-[1px] ${
                 activeTab === "vocab"
-                  ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                  ? "border-neutral-900 text-neutral-900"
+                  : "border-transparent text-neutral-400 hover:text-neutral-700"
               }`}
             >
-              <Database size={14} />
+              <Database size={16} />
               Vocabulary ({vocab.length})
             </button>
             <button
               onClick={() => setActiveTab("merges")}
-              className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+              className={`flex items-center gap-2 px-5 py-2 text-sm font-medium transition-colors border-b-2 -mb-[1px] ${
                 activeTab === "merges"
-                  ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                  ? "border-neutral-900 text-neutral-900"
+                  : "border-transparent text-neutral-400 hover:text-neutral-700"
               }`}
             >
-              <Layers size={14} />
+              <Layers size={16} />
               BPE Merges ({merges.length})
             </button>
           </div>
         </header>
 
         {activeTab === "playground" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="flex-1 flex flex-col lg:flex-row gap-8 min-h-0">
             
             {/* Input Column */}
-            <div className="lg:col-span-6 flex flex-col gap-6">
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col flex-1">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-base font-bold flex items-center gap-2">
-                    <FileText size={18} className="text-indigo-500" />
+            <div className="lg:w-1/2 flex flex-col gap-6 overflow-y-auto pr-2 pb-2">
+              <div className="bg-white border border-neutral-200 p-6 flex flex-col flex-1">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-base font-bold flex items-center gap-2 text-neutral-900">
+                    <FileText size={18} className="text-neutral-500" />
                     Input Corpus / Text
                   </h2>
                   <div className="flex gap-2">
@@ -268,19 +284,19 @@ export default function TokenizerPlayground() {
                 </div>
 
                 {/* Preset Selector */}
-                <div className="mb-4">
-                  <label className="text-xs text-slate-400 block mb-1.5 font-medium">
-                    Or select a preloaded sample:
+                <div className="mb-6">
+                  <label className="text-xs text-neutral-400 block mb-2 font-medium uppercase tracking-wider">
+                    Load Example
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {PRESETS.map((preset) => (
                       <button
                         key={preset.name}
                         onClick={() => setInputText(preset.text)}
-                        className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${
+                        className={`text-xs px-3 py-1.5 border transition-colors ${
                           inputText === preset.text
-                            ? "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400 font-semibold"
-                            : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+                            ? "bg-neutral-900 border-neutral-900 text-white font-medium"
+                            : "bg-white hover:bg-neutral-50 border-neutral-200 text-neutral-600"
                         }`}
                       >
                         {preset.name}
@@ -295,53 +311,53 @@ export default function TokenizerPlayground() {
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     placeholder="Enter text to tokenize..."
-                    className="w-full flex-1 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none shadow-inner"
+                    className="w-full flex-1 p-5 border border-neutral-200 bg-neutral-50 text-sm font-mono focus:outline-none focus:border-neutral-900 focus:bg-white transition-colors resize-none"
                   />
                 </div>
               </div>
             </div>
 
             {/* Visualizer Column */}
-            <div className="lg:col-span-6 flex flex-col gap-6">
+            <div className="lg:w-1/2 flex flex-col gap-6 overflow-y-auto pr-2 pb-2">
               
               {/* Metrics cards */}
               <div className="grid grid-cols-4 gap-4">
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm text-center">
-                  <div className="text-xs text-slate-400 mb-1 font-medium">Tokens</div>
-                  <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
+                <div className="bg-white border border-neutral-200 p-4 text-center">
+                  <div className="text-xs text-neutral-400 mb-1 uppercase tracking-widest font-medium">Tokens</div>
+                  <div className="text-xl font-light text-neutral-900">
                     {metrics.tokenCount}
                   </div>
                 </div>
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm text-center">
-                  <div className="text-xs text-slate-400 mb-1 font-medium">Characters</div>
-                  <div className="text-xl font-bold text-slate-700 dark:text-slate-300">
+                <div className="bg-white border border-neutral-200 p-4 text-center">
+                  <div className="text-xs text-neutral-400 mb-1 uppercase tracking-widest font-medium">Characters</div>
+                  <div className="text-xl font-light text-neutral-900">
                     {metrics.charCount}
                   </div>
                 </div>
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm text-center">
-                  <div className="text-xs text-slate-400 mb-1 font-medium">Bytes</div>
-                  <div className="text-xl font-bold text-slate-700 dark:text-slate-300">
+                <div className="bg-white border border-neutral-200 p-4 text-center">
+                  <div className="text-xs text-neutral-400 mb-1 uppercase tracking-widest font-medium">Bytes</div>
+                  <div className="text-xl font-light text-neutral-900">
                     {metrics.byteCount}
                   </div>
                 </div>
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm text-center">
-                  <div className="text-xs text-slate-400 mb-1 font-medium">Compression</div>
-                  <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                <div className="bg-white border border-neutral-200 p-4 text-center">
+                  <div className="text-xs text-neutral-400 mb-1 uppercase tracking-widest font-medium">Compression</div>
+                  <div className="text-xl font-light text-neutral-900">
                     {metrics.compressionRatio}x
                   </div>
                 </div>
               </div>
 
               {/* Tokenized Output */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col flex-1">
-                <h2 className="text-base font-bold flex items-center gap-2 mb-4">
-                  <Layers size={18} className="text-indigo-500" />
+              <div className="bg-white border border-neutral-200 p-6 flex flex-col flex-1">
+                <h2 className="text-base font-bold flex items-center gap-2 mb-6 text-neutral-900">
+                  <Layers size={18} className="text-neutral-500" />
                   Tokenized Highlights
                 </h2>
 
-                <div className="flex-1 min-h-[200px] border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 rounded-xl p-4 overflow-y-auto leading-relaxed text-sm">
+                <div className="flex-1 min-h-[200px] border border-neutral-200 bg-neutral-50 p-5 overflow-y-auto leading-relaxed text-sm">
                   {tokenDetails.length === 0 ? (
-                    <span className="text-slate-400 italic">Token highlights will be displayed here as you type...</span>
+                    <span className="text-neutral-400 font-light">Token highlights will be displayed here as you type...</span>
                   ) : (
                     <div className="flex flex-wrap content-start items-center gap-x-0.5 gap-y-1.5">
                       {tokenDetails.map((token, idx) => {
@@ -352,10 +368,10 @@ export default function TokenizerPlayground() {
                             key={idx}
                             onMouseEnter={() => setHoveredTokenIndex(idx)}
                             onMouseLeave={() => setHoveredTokenIndex(null)}
-                            className={`px-1 py-0.5 rounded cursor-pointer border transition-all ${theme.bg} ${theme.border} ${theme.text} ${
+                            className={`px-1 py-0.5 cursor-pointer border transition-all ${theme.bg} ${theme.border} ${theme.text} ${
                               isHovered 
-                                ? "scale-105 shadow-md ring-2 ring-indigo-500/30" 
-                                : "hover:scale-105"
+                                ? "shadow-sm border-neutral-900" 
+                                : ""
                             }`}
                           >
                             <code className="whitespace-pre-wrap">{formatTokenText(token.text)}</code>
@@ -368,33 +384,33 @@ export default function TokenizerPlayground() {
               </div>
 
               {/* Token Inspector Panel */}
-              <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm min-h-[140px] flex flex-col justify-center">
+              <div className="bg-white border border-neutral-200 p-6 min-h-[140px] flex flex-col justify-center">
                 {hoveredDetail ? (
                   <div>
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-indigo-500 mb-2 flex items-center gap-1.5">
-                      <Settings size={12} />
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-4 flex items-center gap-2">
+                      <Settings size={14} />
                       Token Inspector
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                       <div>
-                        <span className="text-xs text-slate-400 block">Token ID</span>
-                        <span className="text-lg font-bold font-mono text-indigo-600 dark:text-indigo-400">
+                        <span className="text-xs text-neutral-400 uppercase tracking-widest block mb-1">Token ID</span>
+                        <span className="text-xl font-light font-mono text-neutral-900">
                           {hoveredDetail.id}
                         </span>
                       </div>
                       <div>
-                        <span className="text-xs text-slate-400 block">Decoded Text</span>
-                        <span className="text-sm font-semibold font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded inline-block max-w-full overflow-hidden text-ellipsis">
+                        <span className="text-xs text-neutral-400 uppercase tracking-widest block mb-1">Decoded Text</span>
+                        <span className="text-sm font-medium font-mono bg-neutral-100 px-2 py-1 inline-block max-w-full overflow-hidden text-ellipsis border border-neutral-200">
                           {hoveredDetail.text ? JSON.stringify(hoveredDetail.text) : "[Split byte sequence]"}
                         </span>
                       </div>
                       <div>
-                        <span className="text-xs text-slate-400 block">UTF-8 Bytes</span>
-                        <div className="flex flex-wrap gap-1 mt-0.5">
+                        <span className="text-xs text-neutral-400 uppercase tracking-widest block mb-1">UTF-8 Bytes</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
                           {hoveredDetail.bytes.map((byte, i) => (
                             <span 
                               key={i} 
-                              className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded border border-slate-200 dark:border-slate-700"
+                              className="text-xs font-mono px-2 py-0.5 bg-neutral-100 text-neutral-600 border border-neutral-200"
                             >
                               {byte}
                             </span>
@@ -404,9 +420,9 @@ export default function TokenizerPlayground() {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center text-slate-400 py-4 flex flex-col items-center gap-1">
-                    <Info size={20} className="text-slate-300 dark:text-slate-700" />
-                    <span className="text-xs">Hover over any token block above to inspect its ID and byte representation.</span>
+                  <div className="text-center text-neutral-400 py-4 flex flex-col items-center gap-2">
+                    <Info size={20} className="text-neutral-300" />
+                    <span className="text-sm font-light">Hover over any token block above to inspect its ID and byte representation.</span>
                   </div>
                 )}
               </div>
@@ -417,142 +433,170 @@ export default function TokenizerPlayground() {
         )}
 
         {activeTab === "vocab" && (
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="bg-white border border-neutral-200 p-6 flex flex-col flex-1 min-h-0">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-6 shrink-0">
               <div>
-                <h2 className="text-lg font-bold flex items-center gap-2">
-                  <Database size={20} className="text-indigo-500" />
+                <h2 className="text-2xl font-light flex items-center gap-3 text-neutral-900">
+                  <Database size={24} className="text-neutral-500" />
                   Vocabulary Database
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-sm text-neutral-500 mt-2 font-light max-w-md">
                   Displays the trained BPE dictionary mapping Token IDs to raw sub-word byte patterns.
                 </p>
               </div>
 
               {/* Search bar */}
               <div className="relative max-w-sm w-full">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
                 <input
                   type="text"
                   placeholder="Search by ID, string, or bytes..."
                   value={vocabSearch}
-                  onChange={(e) => setVocabSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                  onChange={(e) => {
+                    setVocabSearch(e.target.value);
+                  }}
+                  className="w-full pl-11 pr-4 py-3 border border-neutral-300 bg-neutral-50 text-sm focus:outline-none focus:border-neutral-900 transition-colors"
                 />
               </div>
             </div>
 
-            {/* Vocab Table */}
-            <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-semibold uppercase tracking-wider">
-                    <th className="p-3 w-28">Token ID</th>
-                    <th className="p-3">Decoded String</th>
-                    <th className="p-3">Underlying Bytes</th>
-                    <th className="p-3 w-16">Copy</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
-                  {filteredVocab.slice(0, 100).map((item, idx) => (
-                    <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                      <td className="p-3 font-semibold text-indigo-600 dark:text-indigo-400">
-                        {item.id}
-                      </td>
-                      <td className="p-3">
-                        <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-800 dark:text-slate-200 text-xs font-semibold">
+            {/* Vocab Table Header */}
+            <div className="flex border border-neutral-200 bg-neutral-50 text-neutral-400 font-medium text-xs uppercase tracking-widest p-3">
+              <div className="w-28">Token ID</div>
+              <div className="flex-1">Decoded String</div>
+              <div className="flex-1">Underlying Bytes</div>
+              <div className="w-16">Copy</div>
+            </div>
+
+            {/* Vocab Virtualized List */}
+            <div ref={vocabParentRef} className="flex-1 overflow-auto border-x border-b border-neutral-200 bg-white min-h-0 relative">
+              <div
+                style={{
+                  height: `${vocabVirtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                {vocabVirtualizer.getVirtualItems().map((virtualItem) => {
+                  const item = filteredVocab[virtualItem.index];
+                  return (
+                    <div
+                      key={item.id}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: `${virtualItem.size}px`,
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
+                      className="flex items-center p-3 border-b border-neutral-100 hover:bg-neutral-50 transition-colors text-sm font-mono"
+                    >
+                      <div className="w-28 font-medium text-neutral-900">{item.id}</div>
+                      <div className="flex-1">
+                        <span className="bg-neutral-100 border border-neutral-200 px-2 py-0.5 text-neutral-800 text-xs font-medium">
                           {JSON.stringify(item.text)}
                         </span>
-                      </td>
-                      <td className="p-3">
-                        <div className="flex flex-wrap gap-1">
-                          {item.bytes.map((byte, i) => (
-                            <span 
-                              key={i} 
-                              className="text-[10px] px-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded text-slate-500"
-                            >
-                              {byte}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="p-3">
+                      </div>
+                      <div className="flex-1 flex flex-wrap gap-1">
+                        {item.bytes.map((byte, i) => (
+                          <span 
+                            key={i} 
+                            className="text-[10px] px-1 bg-white border border-neutral-200 text-neutral-500"
+                          >
+                            {byte}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="w-16">
                         <button
                           onClick={() => copyToClipboard(item.text, item.id)}
-                          className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-all text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                          className="p-1 hover:bg-neutral-200 transition-all text-neutral-400 hover:text-neutral-900"
                         >
                           {copiedIndex === item.id ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredVocab.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="p-8 text-center text-slate-400 italic">
-                        No vocabulary items match your search.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {filteredVocab.length > 100 && (
-              <div className="text-center text-slate-400 mt-4 text-xs italic">
-                Showing first 100 of {filteredVocab.length} matching vocabulary items.
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            )}
+              {filteredVocab.length === 0 && (
+                <div className="p-8 text-center text-neutral-400 font-light">
+                  No vocabulary items match your search.
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {activeTab === "merges" && (
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-            <div className="mb-6">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <Layers size={20} className="text-indigo-500" />
+          <div className="bg-white border border-neutral-200 p-6 flex flex-col flex-1 min-h-0">
+            <div className="mb-6 shrink-0">
+              <h2 className="text-2xl font-light flex items-center gap-3 text-neutral-900">
+                <Layers size={24} className="text-neutral-500" />
                 BPE Merge Rules
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-sm text-neutral-500 mt-2 font-light max-w-lg">
                 Displays the sequence of merging rules trained on the text corpus. In BPE, the most frequent pairs of adjacent bytes are recursively merged into new tokens.
               </p>
             </div>
 
-            {/* Merges Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {merges.map((item, index) => (
-                <div 
-                  key={item.id} 
-                  className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 font-mono text-xs flex flex-col justify-between hover:border-indigo-500/55 dark:hover:border-indigo-500/50 hover:shadow-sm transition-all"
-                >
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="text-[10px] text-slate-400 font-semibold tracking-wider">
-                      MERGE #{index + 1}
-                    </span>
-                    <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">
-                      ID: {item.id}
-                    </span>
-                  </div>
+            {/* Merges Virtualized List */}
+            <div ref={mergesParentRef} className="flex-1 overflow-auto border border-neutral-200 bg-white min-h-0 relative">
+              <div
+                style={{
+                  height: `${mergesVirtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                {mergesVirtualizer.getVirtualItems().map((virtualItem) => {
+                  const index = virtualItem.index;
+                  const item = merges[index];
+                  return (
+                    <div
+                      key={item.id}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: `${virtualItem.size}px`,
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
+                      className="border-b border-neutral-100 flex flex-col md:flex-row md:items-center justify-between p-4 hover:bg-neutral-50 transition-colors font-mono gap-4"
+                    >
+                      <div className="flex items-center gap-6">
+                        <span className="text-[10px] text-neutral-400 font-medium tracking-widest uppercase w-20">
+                          MERGE #{index + 1}
+                        </span>
+                        <span className="text-xs text-neutral-900 font-bold bg-neutral-100 border border-neutral-200 px-2 py-1">
+                          ID: {item.id}
+                        </span>
+                      </div>
 
-                  <div className="flex items-center justify-between gap-1 mt-1 font-semibold text-slate-700 dark:text-slate-350">
-                    <div className="text-center px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded flex-1">
-                      <div className="text-[10px] text-slate-400 mb-0.5 font-normal">Token A</div>
-                      <span>{item.pair.split("-")[0]}</span>
+                      <div className="flex items-center gap-4 font-medium text-neutral-700 text-sm">
+                        <div className="px-3 py-1.5 bg-white border border-neutral-200 flex items-center gap-2">
+                          <span className="text-[10px] text-neutral-400 font-light uppercase tracking-widest">A</span>
+                          <span>{item.pair.split("-")[0]}</span>
+                        </div>
+                        <ArrowRight size={14} className="text-neutral-400 shrink-0" />
+                        <div className="px-3 py-1.5 bg-white border border-neutral-200 flex items-center gap-2">
+                          <span className="text-[10px] text-neutral-400 font-light uppercase tracking-widest">B</span>
+                          <span>{item.pair.split("-")[1]}</span>
+                        </div>
+                      </div>
                     </div>
-                    <ArrowRight size={14} className="text-slate-400" />
-                    <div className="text-center px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded flex-1">
-                      <div className="text-[10px] text-slate-400 mb-0.5 font-normal">Token B</div>
-                      <span>{item.pair.split("-")[1]}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {merges.length === 0 && (
-              <div className="text-center text-slate-400 py-12 italic text-xs">
-                No merge rules loaded. Try running a training step on your BPE tokenizer!
+                  );
+                })}
               </div>
-            )}
+
+              {merges.length === 0 && (
+                <div className="text-center text-neutral-400 py-12 text-sm font-light flex items-center justify-center h-full w-full">
+                  No merge rules loaded. Try running a training step on your BPE tokenizer!
+                </div>
+              )}
+            </div>
           </div>
         )}
 

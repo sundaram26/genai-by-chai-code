@@ -2,6 +2,7 @@
 
 import { FormEvent, useRef, useState } from "react";
 import { Bot, Loader2, Send, UserRound } from "lucide-react";
+import Image from "next/image";
 
 type PersonaId = "piyush" | "hitesh";
 type Role = "user" | "assistant";
@@ -12,9 +13,9 @@ interface Message {
   content: string;
 }
 
-const PERSONAS: Array<{ id: PersonaId; name: string; handle: string }> = [
-  { id: "piyush", name: "Piyush Garg", handle: "piyush.md" },
-  { id: "hitesh", name: "Hitesh Chaudhary", handle: "hitesh.md" },
+const PERSONAS: Array<{ id: PersonaId; name: string; handle: string; image: string }> = [
+  { id: "piyush", name: "Piyush Garg", handle: "piyush.md", image: "/piyush.png" },
+  { id: "hitesh", name: "Hitesh Chaudhary", handle: "hitesh.md", image: "/hitesh.png" },
 ];
 
 function parseOpenAIStreamLines(payload: string) {
@@ -129,28 +130,34 @@ export default function PersonaChat() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 py-6">
-        <header className="mb-5 flex flex-col gap-4 border-b border-slate-800 pb-5 md:flex-row md:items-center md:justify-between">
+    <main className="min-h-screen bg-white text-neutral-900 font-sans selection:bg-neutral-900 selection:text-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col px-6 py-12">
+        <header className="mb-8 flex flex-col gap-6 border-b border-neutral-200 pb-8 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-cyan-400">
+            <p className="text-xs font-bold uppercase tracking-widest text-neutral-400">
               Persona Chat
             </p>
-            <h1 className="mt-1 text-2xl font-black tracking-tight">
+            <h1 className="mt-2 text-3xl font-light tracking-tight text-neutral-900">
               Chat as {selectedPersona.name}
             </h1>
           </div>
 
-          <div className="flex rounded-lg border border-slate-800 bg-slate-900 p-1">
+          <div className="flex border-b border-neutral-200">
             {PERSONAS.map((item) => (
               <button
                 key={item.id}
                 type="button"
-                onClick={() => handlePersonaChange(item.id)}
-                className={`rounded-md px-4 py-2 text-sm font-semibold transition ${
+                onClick={() => {
+                  if (persona !== item.id) {
+                    setPersona(item.id);
+                    setMessages([]);
+                    setError(null);
+                  }
+                }}
+                className={`flex items-center gap-2 px-5 py-2 text-sm font-medium transition-colors border-b-2 -mb-[1px] ${
                   persona === item.id
-                    ? "bg-cyan-400 text-slate-950"
-                    : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                    ? "border-neutral-900 text-neutral-900"
+                    : "border-transparent text-neutral-400 hover:text-neutral-700"
                 }`}
               >
                 {item.name}
@@ -159,55 +166,65 @@ export default function PersonaChat() {
           </div>
         </header>
 
-        <section className="mb-4 rounded-lg border border-slate-800 bg-slate-900 p-4">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-cyan-300">
-              <Bot size={20} />
-            </span>
+        <section className="mb-6 border border-neutral-200 bg-neutral-50 p-6">
+          <div className="flex items-center gap-4">
+            <div className="relative h-12 w-12 shrink-0 bg-white border border-neutral-200 text-neutral-600 overflow-hidden">
+              <Image 
+                src={selectedPersona.image} 
+                alt={selectedPersona.name} 
+                fill 
+                className="object-cover object-top" 
+              />
+            </div>
             <div>
-              <p className="font-bold">{selectedPersona.name}</p>
-              <p className="text-sm text-slate-400">
-                System prompt loaded from `packages/persona/personas/{selectedPersona.handle}`.
+              <p className="font-medium text-neutral-900">{selectedPersona.name}</p>
+              <p className="text-sm font-light text-neutral-500 mt-1">
+                System prompt loaded from <code className="bg-white border border-neutral-200 px-1 py-0.5 text-xs font-mono">packages/persona/personas/{selectedPersona.handle}</code>
               </p>
             </div>
           </div>
         </section>
 
-        <section className="flex min-h-0 flex-1 flex-col rounded-lg border border-slate-800 bg-slate-900">
-          <div className="flex-1 space-y-4 overflow-y-auto p-4">
+        <section className="flex min-h-0 flex-1 flex-col border border-neutral-200 bg-white">
+          <div className="flex-1 space-y-6 overflow-y-auto p-6">
             {messages.length === 0 ? (
-              <div className="flex h-full min-h-80 items-center justify-center text-center text-slate-500">
+              <div className="flex h-full min-h-80 items-center justify-center text-center text-neutral-400 font-light">
                 Ask a question and the backend will stream using the selected markdown persona.
               </div>
             ) : (
               messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex gap-3 ${
+                  className={`flex gap-4 ${
                     message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
                   {message.role === "assistant" && (
-                    <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-950 text-cyan-300">
-                      <Bot size={16} />
-                    </span>
+                    <div className="mt-1 relative h-8 w-8 shrink-0 bg-neutral-100 border border-neutral-200 text-neutral-600 overflow-hidden">
+                      <Image 
+                        src={selectedPersona.image} 
+                        alt={selectedPersona.name} 
+                        fill 
+                        className="object-cover object-top" 
+                      />
+                    </div>
                   )}
                   <div
-                    className={`max-w-[78%] whitespace-pre-wrap rounded-lg px-4 py-3 text-sm leading-6 ${
+                    className={`max-w-[80%] whitespace-pre-wrap px-5 py-4 text-sm leading-relaxed ${
                       message.role === "user"
-                        ? "bg-cyan-400 text-slate-950"
-                        : "border border-slate-800 bg-slate-950 text-slate-100"
+                        ? "bg-neutral-900 text-white font-light"
+                        : "border border-neutral-200 bg-white text-neutral-800 font-light"
                     }`}
                   >
                     {message.content || (
-                      <span className="inline-flex items-center gap-2 text-slate-500">
+                      <span className="inline-flex items-center gap-2 text-neutral-400">
                         <Loader2 size={14} className="animate-spin" />
                         Streaming
                       </span>
                     )}
                   </div>
                   {message.role === "user" && (
-                    <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-800 text-slate-300">
+                    <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center bg-neutral-100 border border-neutral-200 text-neutral-600">
                       <UserRound size={16} />
                     </span>
                   )}
@@ -217,26 +234,26 @@ export default function PersonaChat() {
           </div>
 
           {error && (
-            <div className="border-t border-red-900/60 bg-red-950/40 px-4 py-3 text-sm text-red-200">
+            <div className="border-t border-red-200 bg-red-50 px-6 py-4 text-sm text-red-600">
               {error}
             </div>
           )}
 
           <form
             onSubmit={handleSubmit}
-            className="flex gap-3 border-t border-slate-800 p-4"
+            className="flex gap-4 border-t border-neutral-200 bg-neutral-50 p-6"
           >
             <input
               value={input}
               onChange={(event) => setInput(event.target.value)}
               disabled={isStreaming}
               placeholder={`Message ${selectedPersona.name}`}
-              className="min-w-0 flex-1 rounded-lg border border-slate-800 bg-slate-950 px-4 py-3 text-sm outline-none transition placeholder:text-slate-600 focus:border-cyan-500 disabled:opacity-60"
+              className="min-w-0 flex-1 border border-neutral-300 bg-white px-5 py-3 text-sm outline-none transition placeholder:text-neutral-400 focus:border-neutral-900 disabled:opacity-60"
             />
             <button
               type="submit"
               disabled={isStreaming || !input.trim()}
-              className="inline-flex items-center justify-center rounded-lg bg-cyan-400 px-4 py-3 font-bold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center bg-neutral-900 px-6 py-3 font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isStreaming ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
             </button>
