@@ -15,6 +15,7 @@
     "@all-genai-assignments/tokenizer": "workspace:*",
     "@base-ui/react": "^1.2.0",
     "@hookform/resolvers": "^5.2.2",
+    "@tanstack/react-virtual": "^3.14.6",
     "ai": "^7.0.15",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
