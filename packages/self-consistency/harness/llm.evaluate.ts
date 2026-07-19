@@ -1,7 +1,7 @@
-import { Anthropic } from "@anthropic-ai/sdk";
+import { OpenAI } from "openai";
 import { ChatResponse } from "./sdk/types";
 import { z } from "zod";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
+import { zodResponseFormat } from "openai/helpers/zod";
 
 const EvaluationSchema = z.object({
     analysis: z.string().describe("A brief analysis comparing the different model responses and identifying their strongest parts."),
@@ -9,10 +9,10 @@ const EvaluationSchema = z.object({
 });
 
 export class LlmEvaluator {
-    private anthropicClient: Anthropic;
+    private openaiClient: OpenAI;
 
     constructor() {
-        this.anthropicClient = new Anthropic();
+        this.openaiClient = new OpenAI();
     }
 
     async evaluate(prompt: string, responses: Record<string, ChatResponse>): Promise<string> {
@@ -36,16 +36,21 @@ export class LlmEvaluator {
             The final answer should not simply copy one model’s response. It should be a refined output created after analyzing all model responses.`;
 
         try {
-            const response = await this.anthropicClient.messages.parse({
-                model: "claude-3-5-sonnet-20240620",
-                max_tokens: 2048,
+            const response = await this.openaiClient.chat.completions.create({
+                model: "gpt-4o-mini",
                 temperature: 0.3,
                 messages: [{ role: "user", content: synthesisPrompt }],
-                output_config: { format: zodOutputFormat(EvaluationSchema) }
+                response_format: zodResponseFormat(EvaluationSchema, "evaluation")
             });
 
-            // Return the parsed and validated structured response
-            return response.parsed_output?.final_answer || "Failed to generate synthesized response.";
+            // Extract the structured JSON output
+            const content = response.choices[0]?.message?.content;
+            if (!content) {
+                return "Failed to generate synthesized response.";
+            }
+            
+            const parsed = JSON.parse(content);
+            return parsed.final_answer || "Failed to extract final answer from response.";
         } catch (error: any) {
             console.error("Evaluation failed:", error);
             return "Error during evaluation: " + error.message;
