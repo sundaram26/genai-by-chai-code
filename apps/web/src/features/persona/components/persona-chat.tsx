@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useRef, useState, useEffect } from "react";
 import { Bot, Loader2, Send, UserRound } from "lucide-react";
 import Image from "next/image";
 
@@ -41,6 +41,11 @@ export default function PersonaChat() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const streamAbortRef = useRef<AbortController | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const selectedPersona = PERSONAS.find((item) => item.id === persona)!;
 
@@ -130,9 +135,9 @@ export default function PersonaChat() {
   }
 
   return (
-    <main className="min-h-screen bg-white text-neutral-900 font-sans selection:bg-neutral-900 selection:text-white">
-      <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col px-6 py-12">
-        <header className="mb-8 flex flex-col gap-6 border-b border-neutral-200 pb-8 md:flex-row md:items-end md:justify-between">
+    <main className="fixed inset-0 bg-white text-neutral-900 font-sans selection:bg-neutral-900 selection:text-white flex flex-col">
+      <div className="mx-auto flex flex-1 min-h-0 w-full max-w-4xl flex-col px-6 pt-12 pb-6">
+        <header className="mb-8 flex flex-col gap-6 border-b border-neutral-200 pb-8 md:flex-row md:items-end md:justify-between shrink-0">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-neutral-400">
               Persona Chat
@@ -166,7 +171,7 @@ export default function PersonaChat() {
           </div>
         </header>
 
-        <section className="mb-6 border border-neutral-200 bg-neutral-50 p-6">
+        <section className="mb-6 border border-neutral-200 bg-neutral-50 p-6 shrink-0">
           <div className="flex items-center gap-4">
             <div className="relative h-12 w-12 shrink-0 bg-white border border-neutral-200 text-neutral-600 overflow-hidden">
               <Image 
@@ -231,6 +236,7 @@ export default function PersonaChat() {
                 </div>
               ))
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           {error && (
