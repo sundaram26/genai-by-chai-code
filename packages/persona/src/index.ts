@@ -1,6 +1,4 @@
 import "dotenv/config"
-import * as fs from "fs/promises";
-import * as path from "path";
 import OpenAI from "openai";
 
 export type PersonaId = "piyush" | "hitesh";

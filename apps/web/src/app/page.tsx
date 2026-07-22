@@ -9,7 +9,7 @@ const XIcon = ({ className }: { className?: string }) => (
 
 export default function Home() {
   return (
-    <main className="min-h-screen w-full flex flex-col items-center justify-center bg-white text-neutral-900 selection:bg-neutral-900 selection:text-white font-sans">
+    <main className="min-h-screen w-full flex flex-col items-center justify-center py-16 md:py-24 bg-white text-neutral-900 selection:bg-neutral-900 selection:text-white font-sans">
       <div className="w-full max-w-3xl px-8 flex flex-col justify-center">
         {/* Header Section */}
         <header className="mb-20">

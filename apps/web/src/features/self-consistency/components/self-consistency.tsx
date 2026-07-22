@@ -34,7 +34,7 @@ export function SelfConsistency() {
 
         setLoading(true);
         try {
-            const res = await fetch("http://localhost:3000/api/agent/evaluate", {
+            const res = await fetch("/api/agent/evaluate", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

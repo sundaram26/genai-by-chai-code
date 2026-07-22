@@ -163,6 +163,9 @@ importers:
       '@google/genai':
         specifier: ^2.12.0
         version: 2.12.0(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))
+      cors:
+        specifier: ^2.8.6
+        version: 2.8.6
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -179,6 +182,9 @@ importers:
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
